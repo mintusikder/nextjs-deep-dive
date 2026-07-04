@@ -1,36 +1,331 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📁 Next.js Route Groups (App Router)
 
-## Getting Started
+Route Groups are a feature of the **Next.js App Router** that help you **organize your project** and **apply different layouts** without affecting the URL structure.
 
-First, run the development server:
+> **Important:** Route Groups do **not** appear in the browser URL.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+# What is a Route Group?
+
+A Route Group is simply a folder wrapped with parentheses.
+
+```text
+(auth)
+(marketing)
+(dashboard)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The folder name is **ignored** when generating routes.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Without Route Groups
 
-## Learn More
+```text
+app/
+├── login/
+│   └── page.tsx
+├── register/
+│   └── page.tsx
+├── about/
+│   └── page.tsx
+├── contact/
+│   └── page.tsx
+```
 
-To learn more about Next.js, take a look at the following resources:
+### URLs
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+/login
+/register
+/about
+/contact
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Everything is placed in one folder, which becomes difficult to manage as the project grows.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# With Route Groups
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+app/
+├── (auth)/
+│   ├── login/
+│   │   └── page.tsx
+│   └── register/
+│       └── page.tsx
+│
+├── (marketing)/
+│   ├── about/
+│   │   └── page.tsx
+│   └── contact/
+│       └── page.tsx
+```
+
+### URLs
+
+```
+/login
+/register
+/about
+/contact
+```
+
+Notice that:
+
+```
+(auth)
+(marketing)
+```
+
+do **not** appear in the URL.
+
+---
+
+# Example Code
+
+## Login Page
+
+```tsx
+// app/(auth)/login/page.tsx
+
+export default function LoginPage() {
+  return <h1>Login Page</h1>;
+}
+```
+
+Visit:
+
+```
+http://localhost:3000/login
+```
+
+---
+
+## About Page
+
+```tsx
+// app/(marketing)/about/page.tsx
+
+export default function AboutPage() {
+  return <h1>About Page</h1>;
+}
+```
+
+Visit:
+
+```
+http://localhost:3000/about
+```
+
+---
+
+# Why Use Route Groups?
+
+Imagine your project becomes large.
+
+Instead of this:
+
+```text
+app/
+├── login/
+├── register/
+├── forgot-password/
+├── dashboard/
+├── analytics/
+├── users/
+├── blog/
+├── about/
+├── pricing/
+├── contact/
+```
+
+You can organize it like this:
+
+```text
+app/
+├── (auth)/
+│   ├── login/
+│   ├── register/
+│   └── forgot-password/
+│
+├── (dashboard)/
+│   ├── dashboard/
+│   ├── analytics/
+│   └── users/
+│
+├── (marketing)/
+│   ├── about/
+│   ├── blog/
+│   ├── pricing/
+│   └── contact/
+```
+
+The URLs remain exactly the same.
+
+---
+
+# Using Different Layouts
+
+One of the biggest advantages of Route Groups is applying different layouts.
+
+Example:
+
+```text
+app/
+├── (auth)/
+│   ├── layout.tsx
+│   ├── login/
+│   └── register/
+│
+├── (marketing)/
+│   ├── layout.tsx
+│   ├── about/
+│   └── contact/
+```
+
+---
+
+## Auth Layout
+
+```tsx
+// app/(auth)/layout.tsx
+
+export default function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <main className="flex justify-center items-center min-h-screen">
+      {children}
+    </main>
+  );
+}
+```
+
+Every page inside `(auth)` uses this layout.
+
+---
+
+## Marketing Layout
+
+```tsx
+// app/(marketing)/layout.tsx
+
+export default function MarketingLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <>
+      <nav>Navbar</nav>
+
+      {children}
+
+      <footer>Footer</footer>
+    </>
+  );
+}
+```
+
+Every page inside `(marketing)` automatically gets the Navbar and Footer.
+
+---
+
+# Rendering Example
+
+### Visiting `/login`
+
+```
++-----------------------+
+|                       |
+|       Login Page      |
+|                       |
++-----------------------+
+```
+
+No Navbar or Footer.
+
+---
+
+### Visiting `/about`
+
+```
++-----------------------+
+|       Navbar          |
++-----------------------+
+
+      About Page
+
++-----------------------+
+|       Footer          |
++-----------------------+
+```
+
+---
+
+# Common Mistake
+
+Many developers think:
+
+```text
+(auth)
+```
+
+creates this URL:
+
+```
+/auth/login ❌
+```
+
+This is **incorrect**.
+
+The correct URL is:
+
+```
+/login ✅
+```
+
+The `(auth)` folder is ignored by Next.js when generating routes.
+
+---
+
+# Route Group vs Normal Folder
+
+| Folder    | URL           |
+| --------- | ------------- |
+| `auth/`   | `/auth/login` |
+| `(auth)/` | `/login`      |
+
+---
+
+# Summary
+
+✅ Organize large projects
+
+✅ Keep URLs clean
+
+✅ Apply different layouts
+
+✅ No impact on route paths
+
+---
+
+# Quick Rule
+
+| Syntax      | Purpose        | Appears in URL? |
+| ----------- | -------------- | --------------- |
+| `folder/`   | Normal Route   | ✅ Yes           |
+| `(folder)/` | Route Group    | ❌ No            |
+| `[id]/`     | Dynamic Route  | ✅ Yes           |
+| `@folder/`  | Parallel Route | ❌ No            |
+
+---
+
+# Conclusion
+
+Route Groups are an excellent way to keep your Next.js project clean, scalable, and maintainable. They allow you to organize related pages and assign different layouts without changing your application's URLs.
